@@ -22,7 +22,7 @@ def fetch_ics_calendar_items(url):
 
 
 def read_names_from_file(file_path):
-    with open(file_path, 'r') as file:
+    with open(file_path, "r") as file:
         names = [line.strip() for line in file.readlines()]
     return names
 
@@ -65,7 +65,7 @@ def display_presence_overview(presence):
 
 
 if __name__ == "__main__":
-    names = read_names_from_file('names.txt')
+    names = read_names_from_file("credentials/names.txt")
     calendar_items = fetch_ics_calendar_items(url)
     people = parse_calendar_items(calendar_items, names)
     presence = determine_presence(people)
