@@ -35,7 +35,7 @@ def parse_calendar_items(calendar_items, names):
         name = item["name"]
         start_date = datetime.datetime.strptime(item["start_date"], "%Y-%m-%d").date()
         end_date = datetime.datetime.strptime(item["end_date"], "%Y-%m-%d").date()
-        date_range = (end_date - start_date).days + 1
+        date_range = (end_date - start_date).days
         for i in range(date_range):
             date = (start_date + datetime.timedelta(days=i)).strftime("%Y-%m-%d")
             if any(name.startswith(n) for n in names):
