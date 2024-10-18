@@ -21,16 +21,22 @@ def fetch_ics_calendar_items(url):
     return items
 
 
-def parse_calendar_items(calendar_items):
+def read_names_from_file(file_path):
+    with open(file_path, 'r') as file:
+        names = [line.strip() for line in file.readlines()]
+    return names
+
+
+def parse_calendar_items(calendar_items, names):
     # Parse calendar items for people names
     people = {}
     for item in calendar_items:
         name = item["name"]
         date = item["date"]
-        location = item["location"]
-        if name not in people:
-            people[name] = []
-        people[name].append({"date": date, "location": location})
+        if any(name.startswith(n) for n in names):
+            if name not in people:
+                people[name] = []
+            people[name].append({"date": date})
     return people
 
 
@@ -41,9 +47,7 @@ def determine_presence(people):
         presence[name] = []
         for item in items:
             date = item["date"]
-            location = item["location"]
-            if location == "office":
-                presence[name].append(date)
+            presence[name].append(date)
     return presence
 
 
@@ -61,7 +65,8 @@ def display_presence_overview(presence):
 
 
 if __name__ == "__main__":
+    names = read_names_from_file('names.txt')
     calendar_items = fetch_ics_calendar_items(url)
-    people = parse_calendar_items(calendar_items)
+    people = parse_calendar_items(calendar_items, names)
     presence = determine_presence(people)
     display_presence_overview(presence)
