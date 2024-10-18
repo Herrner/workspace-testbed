@@ -1,20 +1,25 @@
-from credentials import *
+from credentials.calendars import url
 import datetime
 import requests
 from icalendar import Calendar
 
-def fetch_ics_calendar_items(url, username, password):
-    response = requests.get(url, auth=(username, password))
+
+def fetch_ics_calendar_items(url):
+    response = requests.get(url)
+    print(f"Fetching URL: {url}")
+    print(f"Status Code: {response.status_code}")
     response.raise_for_status()
     calendar = Calendar.from_ical(response.content)
     items = []
     for component in calendar.walk():
         if component.name == "VEVENT":
             name = component.get("SUMMARY")
+            print(name)
             date = component.get("DTSTART").dt.strftime("%Y-%m-%d")
             location = component.get("LOCATION", "unknown")
             items.append({"name": name, "date": date, "location": location})
     return items
+
 
 def parse_calendar_items(calendar_items):
     # Parse calendar items for people names
@@ -28,6 +33,7 @@ def parse_calendar_items(calendar_items):
         people[name].append({"date": date, "location": location})
     return people
 
+
 def determine_presence(people):
     # Determine whether people are at the office or not
     presence = {}
@@ -39,6 +45,7 @@ def determine_presence(people):
             if location == "office":
                 presence[name].append(date)
     return presence
+
 
 def display_presence_overview(presence):
     # Display the presence information for the next two weeks
@@ -52,11 +59,9 @@ def display_presence_overview(presence):
             if today <= date_obj <= two_weeks_later:
                 print(f"  - {date}")
 
+
 if __name__ == "__main__":
-    url = "https://nextcloud.example.com/remote.php/dav/calendars/user/calendar.ics"
-    username = "your_username"
-    password = "your_password"
-    calendar_items = fetch_ics_calendar_items(url, username, password)
+    calendar_items = fetch_ics_calendar_items(url)
     people = parse_calendar_items(calendar_items)
     presence = determine_presence(people)
     display_presence_overview(presence)
