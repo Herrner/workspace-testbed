@@ -15,9 +15,10 @@ def fetch_ics_calendar_items(url):
         if component.name == "VEVENT":
             name = component.get("SUMMARY")
             print(name)
-            date = component.get("DTSTART").dt.strftime("%Y-%m-%d")
+            start_date = component.get("DTSTART").dt.strftime("%Y-%m-%d")
+            end_date = component.get("DTEND").dt.strftime("%Y-%m-%d")
             location = component.get("LOCATION", "unknown")
-            items.append({"name": name, "date": date, "location": location})
+            items.append({"name": name, "start_date": start_date, "end_date": end_date, "location": location})
     return items
 
 
@@ -32,11 +33,15 @@ def parse_calendar_items(calendar_items, names):
     people = {}
     for item in calendar_items:
         name = item["name"]
-        date = item["date"]
-        if any(name.startswith(n) for n in names):
-            if name not in people:
-                people[name] = []
-            people[name].append({"date": date})
+        start_date = datetime.datetime.strptime(item["start_date"], "%Y-%m-%d").date()
+        end_date = datetime.datetime.strptime(item["end_date"], "%Y-%m-%d").date()
+        date_range = (end_date - start_date).days + 1
+        for i in range(date_range):
+            date = (start_date + datetime.timedelta(days=i)).strftime("%Y-%m-%d")
+            if any(name.startswith(n) for n in names):
+                if name not in people:
+                    people[name] = []
+                people[name].append({"date": date})
     return people
 
 
@@ -57,12 +62,14 @@ def display_presence_overview(presence):
     today = datetime.date.today()
     two_weeks_later = today + datetime.timedelta(days=14)
     print("Presence overview for the next two weeks:")
-    for date, names in presence.items():
-        date_obj = datetime.datetime.strptime(date, "%Y-%m-%d").date()
-        if today <= date_obj <= two_weeks_later:
-            print(f"{date}:")
-            for name in names:
+    for date in (today + datetime.timedelta(days=i) for i in range(15)):
+        date_str = date.strftime("%Y-%m-%d")
+        if date_str in presence:
+            print(f"{date_str}:")
+            for name in presence[date_str]:
                 print(f"  - {name}")
+        else:
+            print(f"{date_str}: (nobody)")
 
 
 if __name__ == "__main__":
