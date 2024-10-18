@@ -1,16 +1,20 @@
 from credentials import *
 import datetime
+import requests
+from icalendar import Calendar
 
-def fetch_calendar_items():
-    # Placeholder function to fetch items from the zfdm calendar
-    # Replace with actual implementation
-    return [
-        {"name": "Alice", "date": "2023-04-01", "location": "office"},
-        {"name": "Bob", "date": "2023-04-02", "location": "home"},
-        {"name": "Charlie", "date": "2023-04-03", "location": "office"},
-        {"name": "Alice", "date": "2023-04-04", "location": "home"},
-        {"name": "Bob", "date": "2023-04-05", "location": "office"},
-    ]
+def fetch_ics_calendar_items(url, username, password):
+    response = requests.get(url, auth=(username, password))
+    response.raise_for_status()
+    calendar = Calendar.from_ical(response.content)
+    items = []
+    for component in calendar.walk():
+        if component.name == "VEVENT":
+            name = component.get("SUMMARY")
+            date = component.get("DTSTART").dt.strftime("%Y-%m-%d")
+            location = component.get("LOCATION", "unknown")
+            items.append({"name": name, "date": date, "location": location})
+    return items
 
 def parse_calendar_items(calendar_items):
     # Parse calendar items for people names
@@ -49,7 +53,10 @@ def display_presence_overview(presence):
                 print(f"  - {date}")
 
 if __name__ == "__main__":
-    calendar_items = fetch_calendar_items()
+    url = "https://nextcloud.example.com/remote.php/dav/calendars/user/calendar.ics"
+    username = "your_username"
+    password = "your_password"
+    calendar_items = fetch_ics_calendar_items(url, username, password)
     people = parse_calendar_items(calendar_items)
     presence = determine_presence(people)
     display_presence_overview(presence)
