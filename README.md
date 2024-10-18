@@ -18,9 +18,10 @@ This repository includes a feature to display the presence of people in the offi
 
 ```
 Presence overview for the next two weeks:
-Alice:
-  - 2023-04-01
-  - 2023-04-03
-Bob:
-  - 2023-04-05
+2023-04-01:
+  - Alice
+2023-04-03:
+  - Alice
+2023-04-05:
+  - Bob
 ```

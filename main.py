@@ -44,10 +44,11 @@ def determine_presence(people):
     # Determine whether people are at the office or not
     presence = {}
     for name, items in people.items():
-        presence[name] = []
         for item in items:
             date = item["date"]
-            presence[name].append(date)
+            if date not in presence:
+                presence[date] = []
+            presence[date].append(name)
     return presence
 
 
@@ -56,12 +57,12 @@ def display_presence_overview(presence):
     today = datetime.date.today()
     two_weeks_later = today + datetime.timedelta(days=14)
     print("Presence overview for the next two weeks:")
-    for name, dates in presence.items():
-        print(f"{name}:")
-        for date in dates:
-            date_obj = datetime.datetime.strptime(date, "%Y-%m-%d").date()
-            if today <= date_obj <= two_weeks_later:
-                print(f"  - {date}")
+    for date, names in presence.items():
+        date_obj = datetime.datetime.strptime(date, "%Y-%m-%d").date()
+        if today <= date_obj <= two_weeks_later:
+            print(f"{date}:")
+            for name in names:
+                print(f"  - {name}")
 
 
 if __name__ == "__main__":
